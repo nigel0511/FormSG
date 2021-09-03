@@ -146,6 +146,7 @@ export const Button: ComponentStyleConfig = {
       h: 'auto',
       minH: '2.75rem',
       minW: '2.75rem',
+      flexShrink: 0,
     },
     lg: {
       h: 'auto',
