@@ -28,7 +28,7 @@ const useVerificationBox = ({
 
   const onSubmitForm = handleSubmit(async (inputs) => {
     // TODO: Add API call to backend to verify OTP, then return signature.
-    return onSuccess('some signature')
+    return onSuccess(`some signature-${inputs.otp}`)
   })
 
   const onResendOtp = useCallback(() => {
@@ -86,6 +86,7 @@ export const VerificationBox = ({
             isRequired
             isReadOnly={isValid && isSubmitting}
             isInvalid={!!errors.otp}
+            maxW="18rem"
           >
             <FormLabel description={subheader}>{header}</FormLabel>
             <Flex>
