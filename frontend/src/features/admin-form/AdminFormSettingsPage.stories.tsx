@@ -4,6 +4,7 @@ import { Meta, Story } from '@storybook/react'
 import {
   getAdminFormResponse,
   getAdminFormSettings,
+  getAdminFormSubmissions,
 } from '~/mocks/msw/handlers/admin-form'
 
 import { viewports } from '~utils/storybook'
@@ -26,7 +27,11 @@ export default {
   ],
   parameters: {
     layout: 'fullscreen',
-    msw: [getAdminFormResponse(), getAdminFormSettings()],
+    msw: [
+      getAdminFormResponse(),
+      getAdminFormSettings(),
+      getAdminFormSubmissions(),
+    ],
   },
 } as Meta
 
