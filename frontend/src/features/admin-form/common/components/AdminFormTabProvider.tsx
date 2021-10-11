@@ -21,8 +21,20 @@ export const AdminFormTabProvider = ({
   }, [formId])
 
   const defaultIndex = useMemo(() => {
-    const index = routes.findIndex((r) => r === pathname)
-    return index === -1 ? 0 : index
+    // Sort routes by descending length so we get the longest match first.
+    // Slice is used for immutable sort.
+    const sortedRoutes = routes.slice().sort().reverse()
+
+    // Find substring index match
+    const sortedIndex = sortedRoutes.findIndex((route) =>
+      pathname.includes(route),
+    )
+    // Find exact match in original array
+    const index = routes.findIndex(
+      (route) => sortedRoutes[sortedIndex] === route,
+    )
+
+    return index
   }, [pathname, routes])
 
   const [tabIndex, setTabIndex] = useState(defaultIndex)
