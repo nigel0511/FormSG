@@ -59,9 +59,9 @@ export const AdminFormNavbar = ({
         <AdminFormNavbarDetails formInfo={formInfo} />
       </Flex>
       <TabList mt="-1.125rem" mb="-0.25rem" borderBottom="none">
-        <Tab isDisabled={!formInfo}>Create</Tab>
-        <Tab isDisabled={!formInfo}>Settings</Tab>
-        <Tab isDisabled={!formInfo}>Results</Tab>
+        <Tab>Create</Tab>
+        <Tab>Settings</Tab>
+        <Tab>Results</Tab>
       </TabList>
       <ButtonGroup
         spacing="0.5rem"
