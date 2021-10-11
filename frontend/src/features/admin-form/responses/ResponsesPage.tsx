@@ -6,6 +6,9 @@ import { ADMIN_FORM_ROUTE } from '~constants/routes'
 import { TabList } from '~components/Tabs'
 import { Tab } from '~components/Tabs/Tab'
 
+import { FeedbackResultPage } from './FeedbackResultPage'
+import { ResponsesResultPage } from './ResponsesResultPage'
+
 export const ResponsesPage = (): JSX.Element => {
   const { formId } = useParams<{ formId: string }>()
   const history = useHistory()
@@ -44,16 +47,12 @@ export const ResponsesPage = (): JSX.Element => {
       </TabList>
       <TabPanels>
         <TabPanel p={0}>
-          <p>Insert Responses page here!</p>
+          <ResponsesResultPage />
         </TabPanel>
         <TabPanel p={0}>
-          <FeedbackPage />
+          <FeedbackResultPage />
         </TabPanel>
       </TabPanels>
     </Tabs>
   )
-}
-
-const FeedbackPage = () => {
-  return <p>Insert Feedback page here!</p>
 }
