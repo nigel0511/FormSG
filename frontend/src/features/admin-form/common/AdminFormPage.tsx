@@ -1,5 +1,6 @@
 import { TabPanel, TabPanels } from '@chakra-ui/react'
 
+import { ResponsesPage } from '../responses/ResponsesPage'
 import { SettingsPage } from '../settings/SettingsPage'
 
 import AdminFormNavbar from './components/AdminFormNavbar'
@@ -17,7 +18,7 @@ export const AdminFormPage = (): JSX.Element => {
           <SettingsPage />
         </TabPanel>
         <TabPanel p={0}>
-          <p>Insert results page here!</p>
+          <ResponsesPage />
         </TabPanel>
       </TabPanels>
     </AdminFormTabProvider>
