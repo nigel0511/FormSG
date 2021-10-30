@@ -37,21 +37,9 @@ jobs:
           restore-keys: |
             ${{ runner.OS }}-node-
             ${{ runner.OS }}-
-
-  test-frontend:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-      - run: npm ci
-      - run: npm test
-
-  test-frontend-a11y:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-      - run: npm ci
-      - run: npm run test:a11y
+      - name: Run frontend unit tests
+        run: npm test
+      - name: Run frontend a11y tests
+        run: npm run test:a11y
+        # Set job to pass even if a11y tests fail.
+        continue-on-error: true
