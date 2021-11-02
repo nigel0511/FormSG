@@ -1,7 +1,4 @@
-/**
- * @precondition Must have a parent `react-hook-form#FormProvider` component.
- */
-import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ControllerRenderProps, useFormContext } from 'react-hook-form'
 import { BiCheck } from 'react-icons/bi'
 import { Box, chakra, Stack, VisuallyHidden } from '@chakra-ui/react'
@@ -20,16 +17,15 @@ import { BaseFieldProps, FieldContainer } from '../../Field/FieldContainer'
 
 import { VerificationBox } from './components/VerificationBox'
 import { VFN_RENDER_DATA } from './constants'
+import { VerifiableFieldProvider } from './VerifiableFieldContext'
 
-type SupportedField = (MobileFieldBase | EmailFieldBase) & {
-  // Must be true to be used in this component.
-  isVerifiable: true
-}
+export type KnownVerifiableField<T extends MobileFieldBase | EmailFieldBase> =
+  FormFieldWithId<T> & { isVerifiable: true }
 
 export type BaseVerifiableFieldProps = Merge<
   BaseFieldProps,
   {
-    schema: FormFieldWithId<SupportedField>
+    schema: KnownVerifiableField<MobileFieldBase | EmailFieldBase>
   }
 >
 
@@ -38,16 +34,9 @@ export interface VerifiableFieldContainerProps
   children: React.ReactNode
 }
 
-type VerifiableFieldContextProps = {
-  handleInputChange: (
-    onChange: ControllerRenderProps['onChange'],
-  ) => (val?: string | undefined) => void
-  fieldValueName: string
-}
-const VerifiableFieldContext = createContext<
-  VerifiableFieldContextProps | undefined
->(undefined)
-
+/**
+ * @precondition Must have a parent `react-hook-form#FormProvider` component.
+ */
 export const VerifiableFieldContainer = ({
   schema,
   questionNumber,
@@ -57,7 +46,7 @@ export const VerifiableFieldContainer = ({
     Record<string, string>
   >({})
   const [isAllowVfnOpen, setIsAllowVfnOpen] = useState(false)
-  const fieldValueName = useMemo(() => `${schema._id}.fieldValue`, [schema._id])
+  const fieldValueName = useMemo(() => `${schema._id}.value`, [schema._id])
   const signatureName = useMemo(() => `${schema._id}.signature`, [schema._id])
 
   const { setValue, watch, setFocus, register, trigger, getValues, setError } =
@@ -144,72 +133,46 @@ export const VerifiableFieldContainer = ({
   }, [fieldValueName, getValues, isAllowVfnOpen, setError, trigger])
 
   return (
-    <VerifiableFieldContext.Provider
-      value={{ handleInputChange, fieldValueName }}
-    >
-      <VerifiableFieldContext.Consumer>
-        {(context) => {
-          if (!context) {
-            // Will not happen since it's instantiated here
-            throw new Error(
-              `VerifiableFieldContext.Consumer must be used within a VerifiableField component`,
-            )
-          }
-
-          return (
-            <>
-              <FieldContainer schema={schema} questionNumber={questionNumber}>
-                <Stack
-                  spacing="0.5rem"
-                  direction={{ base: 'column', md: 'row' }}
-                >
-                  {children}
-                  {schema.isVerifiable && (
-                    <>
-                      {/* Virtual input to capture signature for verified fields */}
-                      <chakra.input
-                        readOnly
-                        pos="absolute"
-                        w={0}
-                        tabIndex={-1}
-                        aria-hidden
-                        {...register(signatureName, verifiedValidationRules)}
-                        onFocus={() => setFocus(fieldValueName)}
-                      />
-                      <Box>
-                        <Button
-                          disabled={isAllowVfnOpen || hasSavedSignature}
-                          onClick={handleVfnButtonClick}
-                          leftIcon={
-                            hasSavedSignature ? (
-                              <BiCheck fontSize="1.5rem" />
-                            ) : undefined
-                          }
-                        >
-                          {hasSavedSignature ? 'Verified' : 'Verify'}
-                        </Button>
-                      </Box>
-                      <VisuallyHidden>
-                        <FormFieldMessage>
-                          {hasSavedSignature
-                            ? 'This field has been successfully verified'
-                            : 'This field requires verification. Please click the verify button next to this field to verify the field'}
-                        </FormFieldMessage>
-                      </VisuallyHidden>
-                    </>
-                  )}
-                </Stack>
-              </FieldContainer>
-              {isAllowVfnOpen && !hasSavedSignature && (
-                <VerificationBox
-                  onSuccess={onVerificationSuccess}
-                  {...vfnBoxRenderData}
-                />
-              )}
-            </>
-          )
-        }}
-      </VerifiableFieldContext.Consumer>
-    </VerifiableFieldContext.Provider>
+    <VerifiableFieldProvider value={{ handleInputChange, fieldValueName }}>
+      <FieldContainer schema={schema} questionNumber={questionNumber}>
+        <Stack spacing="0.5rem" direction={{ base: 'column', md: 'row' }}>
+          {children}
+          {/* Virtual input to capture signature for verified fields */}
+          <chakra.input
+            readOnly
+            pos="absolute"
+            w={0}
+            tabIndex={-1}
+            aria-hidden
+            {...register(signatureName, verifiedValidationRules)}
+            onFocus={() => setFocus(fieldValueName)}
+          />
+          <Box>
+            <Button
+              disabled={isAllowVfnOpen || hasSavedSignature}
+              onClick={handleVfnButtonClick}
+              leftIcon={
+                hasSavedSignature ? <BiCheck fontSize="1.5rem" /> : undefined
+              }
+            >
+              {hasSavedSignature ? 'Verified' : 'Verify'}
+            </Button>
+          </Box>
+          <VisuallyHidden>
+            <FormFieldMessage>
+              {hasSavedSignature
+                ? 'This field has been successfully verified'
+                : 'This field requires verification. Please click the verify button next to this field to verify the field'}
+            </FormFieldMessage>
+          </VisuallyHidden>
+        </Stack>
+      </FieldContainer>
+      {isAllowVfnOpen && !hasSavedSignature && (
+        <VerificationBox
+          onSuccess={onVerificationSuccess}
+          {...vfnBoxRenderData}
+        />
+      )}
+    </VerifiableFieldProvider>
   )
 }

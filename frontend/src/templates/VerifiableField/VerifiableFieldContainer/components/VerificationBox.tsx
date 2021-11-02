@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useForm } from 'react-hook-form'
-import { Box, Flex, FormControl } from '@chakra-ui/react'
+import { Box, ChakraComponent, Flex, FormControl } from '@chakra-ui/react'
 
 import ResendOtpButton from '~/templates/ResendOtpButton'
 
@@ -15,7 +15,7 @@ type VfnFieldValues = {
 
 export interface VerificationBoxProps {
   onSuccess: (signature: string) => void
-  logo: React.ReactNode
+  logo: ChakraComponent<(props: React.SVGProps<SVGSVGElement>) => JSX.Element>
   header: string
   subheader: string
 }
@@ -56,7 +56,7 @@ const useVerificationBox = ({
 
 export const VerificationBox = ({
   onSuccess,
-  logo,
+  logo: Logo,
   header,
   subheader,
 }: VerificationBoxProps): JSX.Element => {
@@ -78,7 +78,7 @@ export const VerificationBox = ({
       mt="-1rem"
     >
       <Box d={{ base: 'none', md: 'initial' }} mr="2rem">
-        {logo}
+        <Logo />
       </Box>
       <Box>
         <Flex>
