@@ -16,6 +16,7 @@ import Button from '~components/Button'
 import { FieldContainer, FieldContainerProps } from '../FieldContainer'
 
 import { VerificationBox } from './components/VerificationBox'
+import { VFN_RENDER_DATA } from './constants'
 
 type SupportedField = (MobileFieldBase | EmailFieldBase) & {
   // Must be true to be used in this component.
@@ -61,6 +62,11 @@ export const VerifiableField = ({
       })
     }
   }, [hasSavedSignature, signatureName, trigger])
+
+  const vfnBoxRenderData = useMemo(
+    () => VFN_RENDER_DATA[schema.fieldType],
+    [schema.fieldType],
+  )
 
   const verifiedValidationRules = useMemo(() => {
     return {
@@ -154,7 +160,10 @@ export const VerifiableField = ({
         </Flex>
       </FieldContainer>
       {isVfnOpen && !hasSavedSignature && (
-        <VerificationBox onSuccess={onVerificationSuccess} />
+        <VerificationBox
+          onSuccess={onVerificationSuccess}
+          {...vfnBoxRenderData}
+        />
       )}
     </VerifiableFieldContext.Provider>
   )
