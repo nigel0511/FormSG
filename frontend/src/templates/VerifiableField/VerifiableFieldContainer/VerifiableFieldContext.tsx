@@ -6,6 +6,7 @@ type VerifiableFieldContextProps = {
     onChange: ControllerRenderProps['onChange'],
   ) => (val?: string | undefined) => void
   fieldValueName: string
+  hasSavedSignature: boolean
 }
 
 const VerifiableFieldContext = createContext<

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ControllerRenderProps, useFormContext } from 'react-hook-form'
 import { BiCheck } from 'react-icons/bi'
-import { Box, chakra, Stack, VisuallyHidden } from '@chakra-ui/react'
+import { Box, chakra, Stack } from '@chakra-ui/react'
 import { Merge } from 'type-fest'
 
 import {
@@ -11,7 +11,6 @@ import {
 } from '~shared/types/field'
 
 import Button from '~components/Button'
-import FormFieldMessage from '~components/FormControl/FormFieldMessage'
 
 import { BaseFieldProps, FieldContainer } from '../../Field/FieldContainer'
 
@@ -133,7 +132,9 @@ export const VerifiableFieldContainer = ({
   }, [fieldValueName, getValues, isAllowVfnOpen, setError, trigger])
 
   return (
-    <VerifiableFieldProvider value={{ handleInputChange, fieldValueName }}>
+    <VerifiableFieldProvider
+      value={{ handleInputChange, fieldValueName, hasSavedSignature }}
+    >
       <FieldContainer schema={schema} questionNumber={questionNumber}>
         <Stack spacing="0.5rem" direction={{ base: 'column', md: 'row' }}>
           {children}
@@ -158,13 +159,6 @@ export const VerifiableFieldContainer = ({
               {hasSavedSignature ? 'Verified' : 'Verify'}
             </Button>
           </Box>
-          <VisuallyHidden>
-            <FormFieldMessage>
-              {hasSavedSignature
-                ? 'This field has been successfully verified'
-                : 'This field requires verification. Please click the verify button next to this field to verify the field'}
-            </FormFieldMessage>
-          </VisuallyHidden>
         </Stack>
       </FieldContainer>
       {isAllowVfnOpen && !hasSavedSignature && (
