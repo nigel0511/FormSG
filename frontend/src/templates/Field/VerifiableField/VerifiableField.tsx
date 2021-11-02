@@ -17,8 +17,13 @@ import { FieldContainer, FieldContainerProps } from '../FieldContainer'
 
 import { VerificationBox } from './components/VerificationBox'
 
+type SupportedField = (MobileFieldBase | EmailFieldBase) & {
+  // Must be true to be used in this component.
+  isVerifiable: true
+}
+
 export interface VerifiableFieldProps extends FieldContainerProps {
-  schema: FormFieldWithId<MobileFieldBase | EmailFieldBase>
+  schema: FormFieldWithId<SupportedField>
 }
 
 type VerifiableFieldContextProps = {
@@ -87,10 +92,10 @@ export const VerifiableField = ({
 
   const handleInputChange = useCallback(
     (onChange: ControllerRenderProps['onChange']) => (val?: string) => {
+      onChange(val)
       if (isVfnOpen) {
         setIsVfnOpen(false)
       }
-      onChange(val)
       // Unable to use some memoized savedSignature constant, will not set
       // properly; suspect useCallback not recreating function on savedSignature
       // changes.
