@@ -5,6 +5,7 @@ import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
 import { ControllerRenderProps, useFormContext } from 'react-hook-form'
 import { BiCheck } from 'react-icons/bi'
 import { Box, chakra, Stack, VisuallyHidden } from '@chakra-ui/react'
+import { Merge } from 'type-fest'
 
 import {
   EmailFieldBase,
@@ -15,7 +16,7 @@ import {
 import Button from '~components/Button'
 import FormFieldMessage from '~components/FormControl/FormFieldMessage'
 
-import { FieldContainer, FieldContainerProps } from '../FieldContainer'
+import { BaseFieldProps, FieldContainer } from '../../Field/FieldContainer'
 
 import { VerificationBox } from './components/VerificationBox'
 import { VFN_RENDER_DATA } from './constants'
@@ -25,8 +26,16 @@ type SupportedField = (MobileFieldBase | EmailFieldBase) & {
   isVerifiable: true
 }
 
-export interface VerifiableFieldProps extends FieldContainerProps {
-  schema: FormFieldWithId<SupportedField>
+export type BaseVerifiableFieldProps = Merge<
+  BaseFieldProps,
+  {
+    schema: FormFieldWithId<SupportedField>
+  }
+>
+
+export interface VerifiableFieldContainerProps
+  extends BaseVerifiableFieldProps {
+  children: React.ReactNode
 }
 
 type VerifiableFieldContextProps = {
@@ -35,15 +44,15 @@ type VerifiableFieldContextProps = {
   ) => (val?: string | undefined) => void
   fieldValueName: string
 }
-export const VerifiableFieldContext = createContext<
+const VerifiableFieldContext = createContext<
   VerifiableFieldContextProps | undefined
 >(undefined)
 
-export const VerifiableField = ({
+export const VerifiableFieldContainer = ({
   schema,
   questionNumber,
   children,
-}: VerifiableFieldProps): JSX.Element => {
+}: VerifiableFieldContainerProps): JSX.Element => {
   const [mapNumberToSignature, setMapNumberToSignature] = useState<
     Record<string, string>
   >({})
@@ -138,51 +147,69 @@ export const VerifiableField = ({
     <VerifiableFieldContext.Provider
       value={{ handleInputChange, fieldValueName }}
     >
-      <FieldContainer schema={schema} questionNumber={questionNumber}>
-        <Stack spacing="0.5rem" direction={{ base: 'column', md: 'row' }}>
-          {children}
-          {schema.isVerifiable && (
+      <VerifiableFieldContext.Consumer>
+        {(context) => {
+          if (!context) {
+            // Will not happen since it's instantiated here
+            throw new Error(
+              `VerifiableFieldContext.Consumer must be used within a VerifiableField component`,
+            )
+          }
+
+          return (
             <>
-              {/* Virtual input to capture signature for verified fields */}
-              <chakra.input
-                readOnly
-                pos="absolute"
-                w={0}
-                tabIndex={-1}
-                aria-hidden
-                {...register(signatureName, verifiedValidationRules)}
-                onFocus={() => setFocus(fieldValueName)}
-              />
-              <Box>
-                <Button
-                  disabled={isAllowVfnOpen || hasSavedSignature}
-                  onClick={handleVfnButtonClick}
-                  leftIcon={
-                    hasSavedSignature ? (
-                      <BiCheck fontSize="1.5rem" />
-                    ) : undefined
-                  }
+              <FieldContainer schema={schema} questionNumber={questionNumber}>
+                <Stack
+                  spacing="0.5rem"
+                  direction={{ base: 'column', md: 'row' }}
                 >
-                  {hasSavedSignature ? 'Verified' : 'Verify'}
-                </Button>
-              </Box>
-              <VisuallyHidden>
-                <FormFieldMessage>
-                  {hasSavedSignature
-                    ? 'This field has been successfully verified'
-                    : 'This field requires verification. Please click the verify button next to this field to verify the field'}
-                </FormFieldMessage>
-              </VisuallyHidden>
+                  {children}
+                  {schema.isVerifiable && (
+                    <>
+                      {/* Virtual input to capture signature for verified fields */}
+                      <chakra.input
+                        readOnly
+                        pos="absolute"
+                        w={0}
+                        tabIndex={-1}
+                        aria-hidden
+                        {...register(signatureName, verifiedValidationRules)}
+                        onFocus={() => setFocus(fieldValueName)}
+                      />
+                      <Box>
+                        <Button
+                          disabled={isAllowVfnOpen || hasSavedSignature}
+                          onClick={handleVfnButtonClick}
+                          leftIcon={
+                            hasSavedSignature ? (
+                              <BiCheck fontSize="1.5rem" />
+                            ) : undefined
+                          }
+                        >
+                          {hasSavedSignature ? 'Verified' : 'Verify'}
+                        </Button>
+                      </Box>
+                      <VisuallyHidden>
+                        <FormFieldMessage>
+                          {hasSavedSignature
+                            ? 'This field has been successfully verified'
+                            : 'This field requires verification. Please click the verify button next to this field to verify the field'}
+                        </FormFieldMessage>
+                      </VisuallyHidden>
+                    </>
+                  )}
+                </Stack>
+              </FieldContainer>
+              {isAllowVfnOpen && !hasSavedSignature && (
+                <VerificationBox
+                  onSuccess={onVerificationSuccess}
+                  {...vfnBoxRenderData}
+                />
+              )}
             </>
-          )}
-        </Stack>
-      </FieldContainer>
-      {isAllowVfnOpen && !hasSavedSignature && (
-        <VerificationBox
-          onSuccess={onVerificationSuccess}
-          {...vfnBoxRenderData}
-        />
-      )}
+          )
+        }}
+      </VerifiableFieldContext.Consumer>
     </VerifiableFieldContext.Provider>
   )
 }
