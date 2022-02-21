@@ -37,7 +37,7 @@ export const FormSectionsProvider = ({
     [data],
   )
   const [activeSectionId, setActiveSectionId] = useState<string | undefined>(
-    orderedSectionFields?.[0]._id,
+    orderedSectionFields?.[0]?._id,
   )
 
   useEffect(() => {
